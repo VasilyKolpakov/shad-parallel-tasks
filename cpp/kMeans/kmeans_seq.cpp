@@ -1,13 +1,3 @@
-/*
- ============================================================================
- Name        : ParallelKMeans.c
- Author      : VASILY
- Version     :
- Copyright   : Your copyright notice
- Description : Hello OpenMP World in C
- ============================================================================
- */
-#include <omp.h>
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -17,11 +7,7 @@
 #include <string>
 #include <fstream>
 #include <stdlib.h>
-
-//#include <random>
-/**
- * Hello OpenMP World prints the number of threads and the current thread id
- */
+#include <time.h>
 
 using std::vector;
 using std::string;
@@ -125,7 +111,6 @@ vector<Point> CalculateMeans(const vector<Point>& points,
         int numberOfClusters) {
     int dimension = points[0].size();
     vector<Point> means(numberOfClusters, CreateNullPoint(dimension));
-#pragma omp parallel for
     for (int clusterId = 0; clusterId < numberOfClusters; ++clusterId) {
         Point sum = CreateNullPoint(points[0].size());
         int numberOfPointsInCluster = 0;
@@ -164,7 +149,6 @@ vector<int> ClusterDataUsingKMeans(const vector<Point>& points,
     bool thereWasChange = true;
     while (thereWasChange) {
         thereWasChange = false;
-#pragma omp parallel for reduction (|| : thereWasChange)
         for (size_t pointIndex = 0; pointIndex < points.size(); ++pointIndex) {
             int pointClusterId = FindClosestPointIndex(meanPoints, points[pointIndex]);
             if (pointsClusterIds[pointIndex] != pointClusterId) {
@@ -186,16 +170,12 @@ void WriteToFile(const vector<int>& numbers, string path) {
 }
 
 int main(int argc, char *argv[]) {
-    int numberOfThreads = 1;
-    if (argc == 2) {
-        numberOfThreads = atof(argv[1]);
-    }
-    omp_set_num_threads(numberOfThreads);
     srand(13);
-    vector<Point> randomPoints = CreateRandomPoints(30000, 20, 20);
-    double startTime = omp_get_wtime();
-    vector<int> pointsClusterIds = ClusterDataUsingKMeans(randomPoints, 20);
-    cout << "time = " << (omp_get_wtime() - startTime) << "\n";
+    vector<Point> randomPoints = CreateRandomPoints(30000, 30, 20);
+    time_t start = clock();
+    vector<int> pointsClusterIds = ClusterDataUsingKMeans(randomPoints, 30);
+    time_t end = clock();
+    cout << (static_cast<double>(end - start) / CLOCKS_PER_SEC) << "\n";
     WriteToFile(pointsClusterIds, "output");
 }
 
