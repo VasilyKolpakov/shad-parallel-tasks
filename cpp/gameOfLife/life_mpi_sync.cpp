@@ -154,7 +154,7 @@ void GetBorderFromOtherNodes(Cells* cells, int numberOfNodes, int rank) {
     MPI_Status status;
     int rowNum = cells->size();
     int colNum = cells->at(0).size();
-
+    
     int upperNodeRank = modulus(rank + 1, numberOfNodes);
     int upperBorder[colNum];
     MPI_Recv(upperBorder, colNum, MPI_INT, upperNodeRank, MPI_TAG,
@@ -182,11 +182,11 @@ void SendBorderToOtherNodes(Cells* cells, int numberOfNodes, int rank) {
         upperBorderBuff[i] = cells->at(rowNum - 2)[i];
         lowerBorderBuff[i] = cells->at(1)[i];
     }
-    
+
     int upperNodeRank = modulus(rank + 1, numberOfNodes);
     MPI_Bsend(upperBorderBuff, colNum, MPI_INT,
             upperNodeRank, MPI_TAG, MPI_COMM_WORLD);
-
+    
     int lowerNodeRank = modulus(rank - 1, numberOfNodes);
     MPI_Bsend(lowerBorderBuff, colNum, MPI_INT,
             lowerNodeRank, MPI_TAG, MPI_COMM_WORLD);
@@ -412,7 +412,7 @@ int main(int argc, char **argv) {
             numberOfNodes,
             rank);
     double start = MPI_Wtime();
-    DoManyLifeSteps(&extNodeCells, 100, numberOfNodes, rank);
+    DoManyLifeSteps(&extNodeCells, 4*3, numberOfNodes, rank);
     double end = MPI_Wtime();
     Cells allCells = GatherCellsFromAllNodesUsingExtCells(extNodeCells,
             numberOfRows,
@@ -421,6 +421,7 @@ int main(int argc, char **argv) {
             rank);
     if (rank == 0) {
         cout << "time = " << (end - start) << "\n";
+        WriteToConsole(allCells);
     }
     MPI_Finalize();
     return 0;
