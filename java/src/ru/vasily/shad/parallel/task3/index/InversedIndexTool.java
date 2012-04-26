@@ -1,5 +1,6 @@
 package ru.vasily.shad.parallel.task3.index;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -15,11 +16,13 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.google.common.collect.Iterables.transform;
 import static ru.vasily.shad.parallel.task3.ShadParallelConstants.REDUCERS_NUMBER_KEY;
 
 public class InversedIndexTool extends Configured implements Tool
@@ -90,7 +93,15 @@ public class InversedIndexTool extends Configured implements Tool
 
         private List<ArticleNameAndTfIdt> calculateIdfForArticles(Iterable<ArticleNameAndFrequency> values)
         {
-            ArrayList<ArticleNameAndFrequency> articleNamesAndFrecs = Lists.newArrayList(values);
+            Iterable<ArticleNameAndFrequency> clonedValues = transform(values, new Function<ArticleNameAndFrequency, ArticleNameAndFrequency>()
+            {
+                @Override
+                public ArticleNameAndFrequency apply(@Nullable ArticleNameAndFrequency input)
+                {
+                    return input.copy();
+                }
+            });
+            List<ArticleNameAndFrequency> articleNamesAndFrecs = Lists.newArrayList(clonedValues);
             double idf = Math.log(((double) numberOfArticles) / articleNamesAndFrecs.size());
             List<ArticleNameAndTfIdt> articles = new ArrayList<ArticleNameAndTfIdt>();
             for (ArticleNameAndFrequency val : articleNamesAndFrecs)

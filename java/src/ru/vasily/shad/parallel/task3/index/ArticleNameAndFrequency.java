@@ -46,4 +46,11 @@ public class ArticleNameAndFrequency implements Writable
     {
         return articleName + '\t' + frequency;
     }
+
+    public ArticleNameAndFrequency copy()
+    {
+        ArticleNameAndFrequency copy = new ArticleNameAndFrequency();
+        copy.set(articleName, frequency);
+        return copy;
+    }
 }

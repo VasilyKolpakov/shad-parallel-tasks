@@ -53,7 +53,6 @@ public class TopGetterTool extends Configured implements Tool
             textWritable.set(word);
             longWritable.set(occasionsNumber);
             context.write(longWritable, textWritable);
-
         }
     }
 
